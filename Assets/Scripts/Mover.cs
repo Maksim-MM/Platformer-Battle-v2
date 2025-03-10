@@ -18,15 +18,15 @@ public class Mover : MonoBehaviour
     
     public void Move(float direction)
     {
-        float distance = direction * _moveSpeed * Time.deltaTime;
-        
-        switch (distance)
+        float displacement = direction * _moveSpeed * Time.deltaTime;
+       
+        switch (direction)
         {
             case > 0: 
-                transform.Translate(distance * Vector2.right);
+                transform.Translate(displacement * Vector2.right);
                 break;
             case < 0: 
-                transform.Translate(distance * Vector2.left);
+                transform.Translate(displacement * Vector2.left);
                 break;
         }
     }

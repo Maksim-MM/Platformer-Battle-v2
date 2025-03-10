@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
 
-public class Money : MonoBehaviour
+public class Money : MonoBehaviour, ICollectible
 {
-    public event Action MoneyCollected;
+    public event Action ItemCollected;
     
-    private void OnDisable()
+    public void Collect(Player player)
     {
-        MoneyCollected?.Invoke();
+        ItemCollected?.Invoke(); 
     }
 }

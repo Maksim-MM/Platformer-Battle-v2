@@ -1,4 +1,4 @@
-using System;
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent ( typeof ( Mover ) )]
@@ -6,13 +6,14 @@ using UnityEngine;
 [RequireComponent ( typeof ( Health ) )]
 public class Player : MonoBehaviour
 {
-    private const string Horizontal = nameof(Horizontal);
-    private const string Jump = nameof(Jump);
+    private const string Horizontal = "Horizontal";
+    private const string Jump = "Jump";
     
     [SerializeField] private float _groundCheckRadius;
     [SerializeField] private Transform _groundCheck;
     [SerializeField] private LayerMask _groundLayerMask;
     [SerializeField] private Melee _melee;
+    [SerializeField] private float _groundCheckInterval = 0.1f;
 
     private Mover _mover;
     private View _view;
@@ -27,7 +28,12 @@ public class Player : MonoBehaviour
         _health = GetComponent<Health>();
     }
     
-    private void FixedUpdate()
+    private void Start()
+    {
+        StartCoroutine(CheckGroundedRoutine());
+    }
+    
+    private void Update()
     {
         float direction = Input.GetAxis(Horizontal);
         
@@ -37,19 +43,19 @@ public class Player : MonoBehaviour
         HandleAttack();
     }
     
-    private void OnTriggerEnter2D (Collider2D collider)
+    private IEnumerator CheckGroundedRoutine()
     {
-        if (collider.gameObject.TryGetComponent(out AidKit aidKit))
+        while (true)
         {
-            _health.TakeCure(aidKit.GetHealValue());
+            _isTouchingGround = Physics2D.OverlapCircle(_groundCheck.position, _groundCheckRadius, _groundLayerMask);
             
-            aidKit.gameObject.SetActive(false);
+            yield return new WaitForSeconds(_groundCheckInterval);
         }
-
-        if (collider.gameObject.TryGetComponent(out Money money))
-        {
-            money.gameObject.SetActive(false);
-        }
+    }
+    
+    public void TakeHeal(int healValue)
+    {
+        _health.TakeCure(healValue);
     }
     
     private void HandleMovement(float direction)
@@ -61,22 +67,16 @@ public class Player : MonoBehaviour
     private void UpdateAnimation(float direction)
     {
         _view.SetSpeed(Mathf.Abs(direction));
-        _view.SetOnGround(IsGrounded());
+        _view.SetOnGround(_isTouchingGround);
     }
 
     private void HandleJump()
     {
-        if (Input.GetAxis(Jump) > 0f && IsGrounded())
+        if (Input.GetAxis(Jump) > 0f && _isTouchingGround)
         {
             _mover.JumpUp();
-            _view.SetOnGround(!_isTouchingGround);
+            _view.SetOnGround(false);
         }
-    }
-
-    private bool IsGrounded()
-    {
-        return _isTouchingGround = Physics2D.OverlapCircle
-            (_groundCheck.position, _groundCheckRadius, _groundLayerMask);
     }
     
     private void HandleAttack()

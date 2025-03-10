@@ -1,19 +1,16 @@
 using System;
 using UnityEngine;
 
-public class AidKit : MonoBehaviour
+public class AidKit : MonoBehaviour, ICollectible
 {
     [SerializeField] private int _healValue = 10;
     
-    public event Action AidKitCollected;
-
-    private void OnDisable()
+    public event Action ItemCollected;
+    
+    public void Collect(Player player)
     {
-        AidKitCollected?.Invoke();
-    }
-
-    public int GetHealValue()
-    {
-        return _healValue;
+        player.TakeHeal(_healValue);
+        
+        ItemCollected?.Invoke();
     }
 }
