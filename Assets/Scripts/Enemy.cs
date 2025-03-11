@@ -4,8 +4,10 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private Melee _melee;
+    [SerializeField] private float _attackCooldown = 1f; 
     
     private EnemyMover _mover;
+    private float _nextAttackTime;
 
     private void Awake()
     {
@@ -19,9 +21,11 @@ public class Enemy : MonoBehaviour
 
     private void OnTriggerStay2D (Collider2D collider)
     {
-        if (collider.gameObject.TryGetComponent(out Player player))
+        if (collider.gameObject.TryGetComponent(out Player player) && Time.time >= _nextAttackTime)
         {
             _melee.Attack();
+            
+            _nextAttackTime = Time.time + _attackCooldown;
         }
     }
 }
